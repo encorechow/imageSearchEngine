@@ -14,7 +14,7 @@ class ColorDescriptor(object):
 
         # grab the dimensions and compute the center of the image
         (h, w) = image.shape[:2]
-        (cX, cY) = (int (w * 0.5), int(h * 0.5))
+        (cX, cY) = (int(w * 0.5), int(h * 0.5))
 
         # Divide the image into four segments
         # (top-left, top-right, bottom-left, bottom-right)
@@ -24,16 +24,16 @@ class ColorDescriptor(object):
                     (0, cX, cY, h)]
 
         # Construct an elliptical mask representing the center of the image
-        (axesX, axesY) = (int(w * 0.75) / 2, int(h * 0.75) / 2)
-		ellipMask = np.zeros(image.shape[:2], dtype = "uint8")
-		cv2.ellipse(ellipMask, (cX, cY), (axesX, axesY), 0, 0, 360, 255, -1)
+        (axesX, axesY) = (int(w * 0.75 / 2), int(h * 0.75 / 2))
+        ellipMask = np.zeros(image.shape[:2], dtype="uint8")
+        cv2.ellipse(ellipMask, (cX, cY), (axesX, axesY), 0, 0, 360, 255, -1)
 
         for (startX, endX, startY, endY) in segments:
             # Construct a mask for each corner of image, subtracting
             # the elliptical center from it
-            cornerMask = np.zeros(image.shape[:2], dtype = "uint8")
+            cornerMask = np.zeros(image.shape[:2], dtype="uint8")
             cv2.rectangle = (cornerMask, (startX, startY), (endX, endY), 255, -1)
-            cornerMask = cv2.subtract(cornerMask, ellipseMask)
+            cornerMask = cv2.subtract(cornerMask, ellipMask)
 
 
             # Extract a color histogram from the image, then update the feature vector
@@ -52,6 +52,7 @@ class ColorDescriptor(object):
         # Using provided bins per channel; then normalize the histogram.
 
         hist = cv2.calcHist([image], [0, 1, 2], mask, self.bins, [0, 180, 0, 256, 0, 256])
-        hist = cv2.normalize(hist).flatten()
+        hist = cv2.normalize(hist, hist)
+        hist = hist.flatten()
 
         return hist
